@@ -61,7 +61,7 @@ This will produce a jar file named `skate_2.8.0-1.0.jar` that you can add to you
         class Hello {
 
           def hello(body:NodeSeq, atts:MetaData) = {
-            Template.replace(body) {
+            Template.replace(body, atts) {
               case Elem("e", "time", _, _, _*) => Text(new Date().toString)
             }
           }
