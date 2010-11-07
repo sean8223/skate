@@ -16,7 +16,7 @@ class TemplateSuite extends FunSuite {
     info(a.mkString)
   }
 
-  TemplateConfig.debug = debug _
+  //TemplateConfig.debug = debug _
 
   def assertSame(expected:NodeSeq, actual:NodeSeq) = {
     assert(ts(expected) == ts(actual))
