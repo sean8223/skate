@@ -205,16 +205,16 @@ Iteration
 
 First, create a prototype row that contains placeholder elements for actual data values. Pass this into an `ElementHandler` that will substitute actual data values.
 
-       <table>
-         <tr>
-           <th>Name</th>
-           <th>Catchphrase</th>
-         </tr>
-         <t:example.Iteration.row>
+        <table>
+          <tr>
+            <th>Name</th>
+            <th>Catchphrase</th>
+          </tr>
+          <t:example.Iteration.row>
             <tr>
               <td><e:name/></td>
               <td><e:catchphrase/></td>
-	    </tr>
+            </tr>
           </t:example.Iteration.row>
         </table>
 
@@ -238,6 +238,28 @@ In the `ElementHandler`, iterate over the data set with `flatMap`, replacing the
             }
           }
         }
+
+And the output will look like:
+
+        <table>
+          <tr>
+            <th>Name</th>
+            <th>Catchphrase</th>
+          </tr>
+          <tr>
+            <td>Fred Flintsone</td>
+            <td>Yabba Dabba Doo!</td>
+          </tr>
+          <tr>
+            <td>Home Simpson</td>
+            <td>Doh!</td>
+          </tr>
+          <tr>
+            <td>Stewie Griffin</td>
+            <td>What the Deuce?</td>
+          </tr>
+        </table>
+
 
 
 Conditionals
@@ -265,11 +287,13 @@ And in the `ElementHandler`:
 
 More complex structures like JSTL `c:choose/c:when/c:otherwise` can be implemented by putting each branch as a separate element in the body content.
 
-        <s:example.Conditional.choose>
-          <e:foo> ... foo content here ... </e:foo>
-          <e:bar> ... bar content here ... </e:bar>
-          <e:otherwise> ... default content here ... </e:otherwise>
-        </s:example.Conditional.choose>
+        <p>
+          <s:example.Conditional.choose>
+            <e:foo> ... foo content here ... </e:foo>
+            <e:bar> ... bar content here ... </e:bar>
+            <e:otherwise> ... default content here ... </e:otherwise>
+          </s:example.Conditional.choose>
+        </p>
 
 In the element handler, test which branch to return and select it from the body content, discarding the other pieces:
 
@@ -278,7 +302,7 @@ In the element handler, test which branch to return and select it from the body 
         class Conditional {
 
           def doSomeLogic:Option[String] = {
-	    // run your test here, returning the branch
+            // run your test here, returning the branch
             // to be selected as an Option[String]; use
             // None to indicate the "otherwise" case ...
           }
@@ -289,3 +313,9 @@ In the element handler, test which branch to return and select it from the body 
           }
 
         }
+
+Assuming that the `doSomeLogic` method returns `Some("foo")` the tag will render:
+
+        <p>
+          ... foo content here ...
+        </p>
