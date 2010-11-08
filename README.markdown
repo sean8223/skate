@@ -105,9 +105,9 @@ Built-in ElementHandlers
 
 The following basic ElementHandlers are included.
 
-*	ignore
+* ignore
 
-	Enclosed content is removed from the template. For example:
+  Enclosed content is removed from the template. For example:
 
         <p>Blah, blah, blah.</p>
         <s:ignore xmlns:s='urn:skate:1'>
@@ -120,43 +120,43 @@ The following basic ElementHandlers are included.
         <p>Blah, blah, blah.</p>
         <p>Lorem ipsum ... </p>
 
-*	children
+*  children
 
-	Enclosed content is returned verbatim. This is useful primarily in situations where a "container" is needed to create valid XML/XHTML. For example:
+  Enclosed content is returned verbatim. This is useful primarily in situations where a "container" is needed to create valid XML/XHTML. For example:
 
         <s:children xmlns:s='urn:skate:1'>
           <p>Foo, bar, baz ... </p>
         </s:children>
 
-	Results in:
+  Results in:
 
         <p>Foo, bar, baz ... </p>
 
-*	include
+* include
 
-	Inserts one template inside another. The included template will be evaluated. The value of the name parameter should be recognizable to Template.eval(). For example:
+  Inserts one template inside another. The included template will be evaluated. The value of the name parameter should be recognizable to Template.eval(). For example:
 
         <div>
-          <s:include name="foo.shtml"/>
+          <s:include name="foo.shtml" xmlns:s='urn:skate:1'/>
         </div>
 
-	Where "foo.shtml" contains:
+  Where "foo.shtml" contains:
 
         <s:children xmlns:s='urn:skate:1'>
           <p>Lorem ipsum ...</p>
           <p>Etc.</p>
         </s:children>
 
-	Results in:
+  Results in:
 
         <div>
           <p>Lorem ipsum ...</p>
           <p>Etc.</p>
         </div>
 
-*	bind/surround/bind-at
+*  bind/surround/bind-at
 
-	Inserts content inside a template a pre-defined points. Consider the following template (layout.shtml) that defines a very general page structure:
+  Inserts content inside a template a pre-defined points. Consider the following template (layout.shtml) that defines a very general page structure:
 
         <html xmlns:s='urn:skate:1'>
           <body> 
@@ -166,7 +166,7 @@ The following basic ElementHandlers are included.
           </body>
         </html>
 
-        When used with `surround`, the referenced template will be included into the current template, and the `bind` elements will be replaced with content supplied in corresponding `bind-at` elements. For example:
+  When used with `surround`, the referenced template will be included into the current template, and the `bind` elements will be replaced with content supplied in corresponding `bind-at` elements. For example:
 
         <s:surround name="layout.shtml" xmlns:s='urn:skate:1'>
           <s:bind-at name="headerContent">
@@ -180,7 +180,7 @@ The following basic ElementHandlers are included.
           </s:bind-at>
         </s:surround>
 	
-        And will result in the following page:
+  And will result in the following page:
 
         <html>
           <body> 
@@ -195,3 +195,97 @@ The following basic ElementHandlers are included.
             </div>
           </body>
         </html>
+
+
+Examples
+========
+
+Iteration
+---------
+
+First, create a prototype row that contains placeholder elements for actual data values. Pass this into an `ElementHandler` that will substitute actual data values.
+
+       <table>
+         <tr>
+           <th>Name</th>
+           <th>Catchphrase</th>
+         </tr>
+         <t:example.Iteration.row>
+            <tr>
+              <td><e:name/></td>
+              <td><e:catchphrase/></td>
+	    </tr>
+          </t:example.Iteration.row>
+        </table>
+
+In the `ElementHandler`, iterate over the data set with `flatMap`, replacing the placeholder elements in the body with actual data values for each row in the table:
+
+        package example
+
+        class Iteration {
+
+          def row(body:NodeSeq, atts:MetaData):NodeSeq = {
+  
+            val data = Map("Fred Flintstone" -> "Yabba Dabba Doo!",
+                           "Homer Simpson" -> "Doh!",
+                           "Stewie Griffin" -> "What the Deuce?")
+
+            data.toSeq.flatMap {
+              x => Template.replace(body, atts) {
+                case Elem(_, "name", _, _, _*) => Text(x._1)
+                case Elem(_, "catchphrase", _, _, _*) => Text(x._2)
+              }
+            }
+          }
+        }
+
+
+Conditionals
+------------
+
+Simple conditionals (a la JSTL `c:if`) can be implemented as a function that discards the body content by returning `NodeSeq.Empty` if the condition is not satisfied. For example:
+
+        <s:example.Conditional.simple>
+          <p>Include this only if some condition is true</p>
+        </s:example.Conditional.simple>
+
+And in the `ElementHandler`:
+
+        package example
+
+        class Conditional {
+
+          def simple(body:NodeSeq, atts:MetaData):NodeSeq = {
+            val test:Boolean = doSomeLogic()
+            if (test) body
+            else NodeSeq.Empty
+          }
+
+        }
+
+More complex structures like JSTL `c:choose/c:when/c:otherwise` can be implemented by putting each branch as a separate element in the body content.
+
+        <s:example.Conditional.choose>
+          <e:foo> ... foo content here ... </e:foo>
+          <e:bar> ... bar content here ... </e:bar>
+          <e:otherwise> ... default content here ... </e:otherwise>
+        </s:example.Conditional.choose>
+
+In the element handler, test which branch to return and select it from the body content, discarding the other pieces:
+
+        package example
+
+        class Conditional {
+
+          def doSomeLogic:Option[String] = {
+	    // run your test here, returning the branch
+            // to be selected as an Option[String]; use
+            // None to indicate the "otherwise" case ...
+          }
+  
+          def choose(body:NodeSeq, atts:MetaData):NodeSeq = {
+            val test = doSomeLogic.getOrElse("otherwise")
+            body.find(e => e.label == test).map(e => e.child).getOrElse(throw new Exception("No branch for " + test))
+          }
+
+        }
