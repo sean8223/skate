@@ -319,3 +319,9 @@ Assuming that the `doSomeLogic` method returns `Some("foo")` the tag will render
         <p>
           ... foo content here ...
         </p>
+
+
+TODO
+====
+
+* Localization of templates based on file suffix
