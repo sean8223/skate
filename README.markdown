@@ -82,7 +82,7 @@ This will produce a jar file named `skate_2.8.0-1.0.jar` that you can add to you
   With Scalatra, this can be rigged up as follows:
 
         import skate.Template
-	import skate.scalatra.SkateSupport
+        import skate.scalatra.SkateSupport
 
         class MyApp extends ScalatraServlet with SkateSupport {
 
