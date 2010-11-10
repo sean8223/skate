@@ -81,22 +81,15 @@ This will produce a jar file named `skate_2.8.0-1.0.jar` that you can add to you
 
   With Scalatra, this can be rigged up as follows:
 
-        import javax.servlet.ServletConfig
         import skate.Template
-        import skate.TemplateConfig
+	import skate.scalatra.SkateSupport
 
-        class MyApp extends ScalatraServlet {
+        class MyApp extends ScalatraServlet with SkateSupport {
 
-          override def initialize(config:Config) {
-            config match {
-              case sc:ServletConfig => TemplateConfig.findTemplate = ServletSupport.defaultTemplateFinder(_, sc.getServletContext)
-              case _ => ;
-            }
-          }
-        
           get("*.shtml") {
             Template.eval(requestPath)
           }
+
        }
 
 
